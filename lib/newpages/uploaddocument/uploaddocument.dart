@@ -22,6 +22,7 @@ class _UploadDocumentDataState extends State<UploadDocumentData> {
   late TextEditingController begindateController = TextEditingController();
   late TextEditingController dobController = TextEditingController();
   late TextEditingController documenttypeController = TextEditingController();
+  String documenturl = '';
   late TextEditingController downloadableController = TextEditingController();
   final List<String> downloadablechoicellist = [
     'YES',
@@ -31,18 +32,26 @@ class _UploadDocumentDataState extends State<UploadDocumentData> {
   late TextEditingController expiryController = TextEditingController();
   late double filesize;
   final List<String> identitytypelist = [
-    'passport',
-    'Aadhar',
-    'driver license',
+    'PASSPORT',
+    'VISA',
+    'SPOUSE_PROOF',
+    'ADDRESS_PROOF',
+    'BRP'
   ];
 
   bool isfetching = false;
   var l = Logger();
   late TextEditingController nameController = TextEditingController();
   late TextEditingController numberController = TextEditingController();
-  String documenturl = '';
   String? selecteddownloadabletype;
   String? selectedidentitytype;
+  bool validatename = false;
+  bool validatenumber = false;
+  bool validatebegin = false;
+  bool validateexpiry = false;
+  bool validatedocumenttype = false;
+  bool validatedownloadable = false;
+  bool validatefileselected = true;
 
   selectfile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -58,8 +67,10 @@ class _UploadDocumentDataState extends State<UploadDocumentData> {
         filesize = file.size / 1000;
         l.w(filesize);
         documenturl = file.path!;
+        validatefileselected = true;
       });
     } else {
+      validatefileselected = false;
       l.w('canceled');
     }
   }
@@ -118,7 +129,16 @@ class _UploadDocumentDataState extends State<UploadDocumentData> {
                               borderRadius:
                                   BorderRadius.all(Radius.circular(12.0)),
                             ),
+                            errorText:
+                                validatename ? 'Enter document name' : null,
                           ),
+                          onChanged: (value) {
+                            if (nameController.text.isNotEmpty) {
+                              setState(() {
+                                validatename = false;
+                              });
+                            }
+                          },
                         ),
                       )
                     ],
@@ -150,7 +170,16 @@ class _UploadDocumentDataState extends State<UploadDocumentData> {
                               borderRadius:
                                   BorderRadius.all(Radius.circular(12.0)),
                             ),
+                            errorText:
+                                validatenumber ? 'Enter document number' : null,
                           ),
+                          onChanged: (value) {
+                            if (numberController.text.isNotEmpty) {
+                              setState(() {
+                                validatenumber = false;
+                              });
+                            }
+                          },
                         ),
                       )
                     ],
@@ -189,9 +218,18 @@ class _UploadDocumentDataState extends State<UploadDocumentData> {
                               color: Colors.grey,
                               size: 24,
                             ),
+                            errorText: validatebegin
+                                ? 'Please select begin date'
+                                : null,
                           ),
                           onChanged: (val) {
                             begindateController.text = val;
+
+                            if (begindateController.text.isNotEmpty) {
+                              setState(() {
+                                validatebegin = false;
+                              });
+                            }
                           },
                         ),
                       ),
@@ -231,9 +269,17 @@ class _UploadDocumentDataState extends State<UploadDocumentData> {
                               color: Colors.grey,
                               size: 24,
                             ),
+                            errorText: validateexpiry
+                                ? 'Please select expiry date'
+                                : null,
                           ),
                           onChanged: (val) {
                             expiryController.text = val;
+                            if (expiryController.text.isNotEmpty) {
+                              setState(() {
+                                validateexpiry = false;
+                              });
+                            }
                           },
                         ),
                       ),
@@ -270,6 +316,9 @@ class _UploadDocumentDataState extends State<UploadDocumentData> {
                               borderRadius:
                                   BorderRadius.all(Radius.circular(12.0)),
                             ),
+                            errorText: validatedocumenttype
+                                ? 'Please select Document type'
+                                : null,
                           ),
                           isExpanded: true,
                           hint: Text(
@@ -296,6 +345,7 @@ class _UploadDocumentDataState extends State<UploadDocumentData> {
                           onChanged: (String? value) async {
                             setState(() {
                               selectedidentitytype = value!;
+                              validatedocumenttype = false;
                             });
                           },
                         ),
@@ -333,6 +383,9 @@ class _UploadDocumentDataState extends State<UploadDocumentData> {
                               borderRadius:
                                   BorderRadius.all(Radius.circular(12.0)),
                             ),
+                            errorText: validatedownloadable
+                                ? 'Please select downloadable type'
+                                : null,
                           ),
                           isExpanded: true,
                           hint: Text(
@@ -359,6 +412,7 @@ class _UploadDocumentDataState extends State<UploadDocumentData> {
                           onChanged: (String? value) async {
                             setState(() {
                               selecteddownloadabletype = value!;
+                              validatedownloadable = false;
                             });
                           },
                         ),
@@ -376,6 +430,9 @@ class _UploadDocumentDataState extends State<UploadDocumentData> {
                             selectfile();
                           },
                         ),
+                  SizedBox(
+                    height: 5,
+                  ),
                   SizedBox(
                     width: size.width,
                     child: ElevatedButton(
@@ -399,8 +456,23 @@ class _UploadDocumentDataState extends State<UploadDocumentData> {
                   ),
                 ],
               ),
+              validatefileselected == true
+                  ? SizedBox()
+                  : Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(
+                            4.0,
+                          ),
+                          child: Text(
+                            "Please select file",
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    ),
               SizedBox(
-                height: size.width * 0.10,
+                height: size.width * 0.05,
               ),
               SizedBox(
                 width: size.width,
@@ -410,75 +482,98 @@ class _UploadDocumentDataState extends State<UploadDocumentData> {
                     shape: const StadiumBorder(),
                     backgroundColor: oxfordBlue,
                   ),
-                  onPressed: () async {
-                    if (nameController.text.isEmpty) {
-                      ToastData.showToast(context, "Document Name is Required");
-                      return;
-                    }
-                    if (numberController.text.isEmpty) {
-                      ToastData.showToast(
-                          context, "Document Number is Required");
-                      return;
-                    }
+                  onPressed: isfetching == true
+                      ? () {}
+                      : () async {
+                          if (nameController.text.isEmpty) {
+                            setState(() {
+                              validatename = true;
+                            });
+                            return;
+                          }
+                          if (numberController.text.isEmpty) {
+                            setState(() {
+                              validatenumber = true;
+                            });
+                            return;
+                          }
 
-                    if (begindateController.text.isEmpty) {
-                      ToastData.showToast(context, "Please select begin date");
-                      return;
-                    }
+                          if (begindateController.text.isEmpty) {
+                            setState(() {
+                              validatebegin = true;
+                            });
+                            return;
+                          }
 
-                    if (expiryController.text.isEmpty) {
-                      ToastData.showToast(context, "Please select expiry date");
-                      return;
-                    }
+                          if (expiryController.text.isEmpty) {
+                            setState(() {
+                              validateexpiry = true;
+                            });
+                            return;
+                          }
 
-                    if (selectedidentitytype == null) {
-                      ToastData.showToast(context, "Document Type is Required");
-                      return;
-                    }
+                          if (selectedidentitytype == null) {
+                            ToastData.showToast(
+                                context, "Document Type is Required");
+                            setState(() {
+                              validatedocumenttype = true;
+                            });
+                            return;
+                          }
 
-                    if (selecteddownloadabletype == null) {
-                      ToastData.showToast(
-                          context, "please select downloadable type");
-                      return;
-                    }
+                          if (selecteddownloadabletype == null) {
+                            setState(() {
+                              validatedownloadable = true;
+                            });
+                            return;
+                          }
 
-                    if (documenturl == '') {
-                      ToastData.showToast(
-                          context, "please select document file");
-                      return;
-                    }
-                    if (filesize >= 5000) {
-                      ToastData.showToast(
-                          context, "upload smaller file size less than 500Kb");
-                      return;
-                    }
+                          if (documenturl == '') {
+                            setState(() {
+                              validatefileselected = false;
+                            });
+                            return;
+                          }
+                          if (filesize >= 5000) {
+                            ToastData.showToast(context,
+                                "upload smaller file size less than 500Kb");
+                            return;
+                          }
 
-                    setState(() {
-                      isfetching = true;
-                    });
-                    var response = await UploadDocumentAPI.uploaddocumnets(
-                      doc_name: nameController.text,
-                      doc_number: numberController.text,
-                      doc_downloadable: selecteddownloadabletype!,
-                      doc_emp_id: "1",
-                      doc_begin_date: begindateController.text,
-                      doc_expiry: expiryController.text,
-                      doc_type: selectedidentitytype!,
-                      doc_url: documenturl,
-                    );
-                    if (response['status'] == true) {
-                      setState(() {
-                        isfetching = false;
-                      });
-                      ToastData.showToast(context, "uploaded successfully");
-                    } else {
-                      setState(() {
-                        isfetching = false;
-                      });
-                      ToastData.showToast(context, "Failed to upload document");
-                    }
-                  },
-                  child: Text("Upload"),
+                          setState(() {
+                            isfetching = true;
+                          });
+                          var response =
+                              await UploadDocumentAPI.uploaddocumnets(
+                            doc_name: nameController.text,
+                            doc_number: numberController.text,
+                            doc_downloadable: selecteddownloadabletype!,
+                            doc_emp_id: "1",
+                            doc_begin_date: begindateController.text,
+                            doc_expiry: expiryController.text,
+                            doc_type: selectedidentitytype!,
+                            doc_url: documenturl,
+                          );
+                          if (response['status'] == true) {
+                            setState(() {
+                              isfetching = false;
+                              nameController.clear();
+                              numberController.clear();
+                              begindateController.clear();
+                              expiryController.clear();
+                            });
+                            ToastData.showToast(
+                                context, "uploaded successfully");
+                          } else {
+                            setState(() {
+                              isfetching = false;
+                            });
+                            ToastData.showToast(
+                                context, "Failed to upload document");
+                          }
+                        },
+                  child:
+                      isfetching == true ? Text("Uploading") : Text("Upload"),
                 ),
               ),
             ],
