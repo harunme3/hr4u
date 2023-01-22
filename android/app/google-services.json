@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "411867547740",
+    "project_id": "hr4u-81d51",
+    "storage_bucket": "hr4u-81d51.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:411867547740:android:029f1459922a6b8d103e99",
+        "android_client_info": {
+          "package_name": "com.hr4u.www.hr4u"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "411867547740-us4opidqg9q8asheb19c8qqrffp2nhev.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWvloj8cHBNQpq2mamEzeX0a_0afYbdTQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "411867547740-us4opidqg9q8asheb19c8qqrffp2nhev.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
